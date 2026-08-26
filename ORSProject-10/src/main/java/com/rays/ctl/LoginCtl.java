@@ -118,16 +118,14 @@ public class LoginCtl extends BaseCtl<UserForm, UserDTO, UserServiceInt> {
 			return res;
 		}
 
-		UserDTO fDto = baseService.forgotPassword(form.getLoginId());
+		boolean flag = baseService.forgotPassword(form.getLoginId());
 
-		if (fDto == null) {
-			res.setSuccess(false);
-			res.addMessage("LoginId / Email not found.");
-			return res;
-		} else {
+		if (flag == true) {
 			res.setSuccess(true);
-			res.addMessage("Hello " + fDto.getFirstName() + " " + fDto.getLastName()
-					+ "..! Your password has been sent on your email.");
+			res.addMessage("Password sent to your email");
+		} else {
+			res.setSuccess(false);
+			res.addMessage("Login Id not found");
 		}
 		return res;
 	}
