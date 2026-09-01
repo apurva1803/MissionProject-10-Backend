@@ -27,6 +27,13 @@ public class MarksheetDAOImpl extends BaseDAOImpl<MarksheetDTO> implements Marks
 	}
 
 	@Override
+	public List<MarksheetDTO> getMeritList() {
+		System.out.println("marksheetDao merit marksheett run start");
+		List list = super.marksheetMeritList("from MarksheetDTO order by (physics+chemistry+maths) desc", null);
+		return list;
+	}
+
+	@Override
 	protected void populate(MarksheetDTO dto, UserContext userContext) {
 		if (dto.getStudentId() != null) {
 			StudentDTO studentDTO = studentDao.findByPK(dto.getStudentId(), userContext);

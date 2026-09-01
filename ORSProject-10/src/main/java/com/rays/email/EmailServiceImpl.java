@@ -1,45 +1,44 @@
-package com.rays.email;
 
-import jakarta.mail.internet.MimeMessage;
+package com.rays.email;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
+import jakarta.mail.internet.MimeMessage;
+
 @Service
 public class EmailServiceImpl implements EmailServiceInt {
 
-    
     @Autowired
     private JavaMailSender mailSender;
 
     @Override
-    public void sendMail(EmailMessage msg) {
+    public void sendMail(EmailDTO email) {
+
         try {
 
-            // Create MIME message
             MimeMessage mimeMessage = mailSender.createMimeMessage();
 
-            // Helper for setting email properties
-            MimeMessageHelper helper = new MimeMessageHelper(mimeMessage, true);
+            MimeMessageHelper helper =
+                    new MimeMessageHelper(mimeMessage, true);
 
-            // Set recipient and subject
-            helper.setTo(msg.getTo());
-            helper.setSubject(msg.getSubject());
+            helper.setTo(email.getTo());
+            helper.setSubject(email.getSubject());
 
-            // Set message content (HTML or Text)
-            if (msg.getMessageType() == EmailMessage.HTML_MSG) {
-                helper.setText(msg.getMessage(), true); // HTML content
-            } else {
-                helper.setText(msg.getMessage(), false); // Plain text
-            }
+            // true = HTML email
+            helper.setText(email.getMessage(), true);
 
-            // Send email
             mailSender.send(mimeMessage);
 
         } catch (Exception e) {
+
             e.printStackTrace();
+
+            throw new RuntimeException(
+                    "Failed to send email: " + e.getMessage());
         }
     }
 }
+

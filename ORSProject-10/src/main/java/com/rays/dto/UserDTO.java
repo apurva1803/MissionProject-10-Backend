@@ -199,4 +199,8 @@ public class UserDTO extends BaseDTO {
 	public String getValue() {
 		return null;
 	}
+
+	public String getEmail() {
+		return null;
+	}
 }
