@@ -1,0 +1,198 @@
+
+package com.rays.ctl;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.Map;
+
+import org.hibernate.SessionFactory;
+import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
+import org.springframework.http.MediaType;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
+import jakarta.servlet.http.HttpServletResponse;
+
+import net.sf.jasperreports.engine.JRException;
+import net.sf.jasperreports.engine.JasperCompileManager;
+import net.sf.jasperreports.engine.JasperExportManager;
+import net.sf.jasperreports.engine.JasperFillManager;
+import net.sf.jasperreports.engine.JasperPrint;
+import net.sf.jasperreports.engine.JasperReport;
+
+@Transactional
+@RestController
+@RequestMapping("/jasper")
+public class JasperCtl {
+
+    @PersistenceContext
+    private EntityManager entityManager;
+
+    @GetMapping(value = "/report", produces = MediaType.APPLICATION_PDF_VALUE)
+    public void generateReport(HttpServletResponse response)
+            throws JRException, IOException, SQLException {
+
+        System.out.println("******** Jasper Report Start ********");
+
+        Connection connection = null;
+
+        try {
+
+            // ============================
+            // 1. Load JRXML
+            // ============================
+
+            InputStream inputStream =
+                    getClass().getResourceAsStream("/reports/Project10.jrxml");
+
+            if (inputStream == null) {
+                throw new RuntimeException(
+                        "Project10.jrxml not found. " +
+                        "Put it inside src/main/resources/reports/"
+                );
+            }
+
+            System.out.println("JRXML loaded successfully");
+
+
+            // ============================
+            // 2. Compile JRXML
+            // ============================
+
+            JasperReport jasperReport =
+                    JasperCompileManager.compileReport(inputStream);
+
+            System.out.println("JRXML compiled successfully");
+
+
+            // ============================
+            // 3. Parameters
+            // ============================
+
+            Map<String, Object> parameters = new HashMap<>();
+
+            parameters.put("createdBy", "Admin");
+
+
+            // ============================
+            // 4. Get Database Connection
+            // ============================
+
+            SessionFactory sessionFactory =
+                    entityManager
+                            .getEntityManagerFactory()
+                            .unwrap(SessionFactory.class);
+
+            ConnectionProvider connectionProvider =
+                    sessionFactory
+                            .getSessionFactoryOptions()
+                            .getServiceRegistry()
+                            .getService(ConnectionProvider.class);
+
+            connection = connectionProvider.getConnection();
+
+            System.out.println("Database connection obtained");
+
+
+            // ============================
+            // 5. Fill Report
+            // ============================
+
+            JasperPrint jasperPrint =
+                    JasperFillManager.fillReport(
+                            jasperReport,
+                            parameters,
+                            connection
+                    );
+
+            System.out.println("Report filled successfully");
+
+
+            // ============================
+            // 6. Export PDF
+            // ============================
+
+            byte[] pdf =
+                    JasperExportManager.exportReportToPdf(jasperPrint);
+
+
+            // ============================
+            // 7. Send PDF Response
+            // ============================
+
+            response.setContentType(MediaType.APPLICATION_PDF_VALUE);
+
+            response.setHeader(
+                    "Content-Disposition",
+                    "inline; filename=Project10-Merit-List.pdf"
+            );
+
+            response.setContentLength(pdf.length);
+
+            response.getOutputStream().write(pdf);
+
+            response.getOutputStream().flush();
+
+            System.out.println("******** Report Generated Successfully ********");
+
+        } catch (Exception e) {
+
+            // ============================
+            // Print Complete Error
+            // ============================
+
+            System.out.println("******** Jasper Report Error ********");
+
+            e.printStackTrace();
+
+            Throwable cause = e;
+
+            while (cause != null) {
+                System.out.println("CAUSE: " + cause);
+                cause = cause.getCause();
+            }
+
+
+            // ============================
+            // Send Error Response
+            // ============================
+
+            response.reset();
+
+            response.setStatus(
+                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR
+            );
+
+            response.setContentType("text/plain");
+
+            response.getWriter().write(
+                    "Jasper Report Error:\n\n" +
+                    e.toString()
+            );
+
+        } finally {
+
+            // ============================
+            // Close Database Connection
+            // ============================
+
+            if (connection != null) {
+                try {
+                    connection.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
+
+            System.out.println("******** Jasper Report End ********");
+        }
+    }
+}
+
