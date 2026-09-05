@@ -1,8 +1,8 @@
-
 package com.rays.email;
+
 
 public interface EmailServiceInt {
 
-    public void sendMail(EmailDTO email);
+   
+    public void sendMail(EmailMessage msg);
 }
-

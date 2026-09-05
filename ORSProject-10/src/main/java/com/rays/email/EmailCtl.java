@@ -1,25 +1,31 @@
 package com.rays.email;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+
 @RestController
-@RequestMapping("/api/email")
+@RequestMapping(name = "Mail")
 public class EmailCtl {
 
+   
     @Autowired
     private EmailServiceInt emailService;
 
-    @PostMapping("/send")
-    public ResponseEntity<String> sendMail(
-            @RequestBody EmailDTO email) {
+    @GetMapping("/send")
+    public String sendMail() {
 
-        emailService.sendMail(email);
+        // Create email message
+        EmailMessage msg = new EmailMessage();
+        msg.setTo("cb@gmail.com");
+        msg.setSubject("Spring Boot Mail");
+        msg.setMessage("Hello, Mail sent successfully!");
 
-        return ResponseEntity.ok("Mail sent successfully");
+        // Send email using service
+        emailService.sendMail(msg);
+
+        return "Mail Sent Successfully";
     }
 }

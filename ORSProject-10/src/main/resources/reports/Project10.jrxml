@@ -1,198 +1,199 @@
-
-package com.rays.ctl;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.Connection;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.Map;
-
-import org.hibernate.SessionFactory;
-import org.hibernate.engine.jdbc.connections.spi.ConnectionProvider;
-import org.springframework.http.MediaType;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import jakarta.servlet.http.HttpServletResponse;
-
-import net.sf.jasperreports.engine.JRException;
-import net.sf.jasperreports.engine.JasperCompileManager;
-import net.sf.jasperreports.engine.JasperExportManager;
-import net.sf.jasperreports.engine.JasperFillManager;
-import net.sf.jasperreports.engine.JasperPrint;
-import net.sf.jasperreports.engine.JasperReport;
-
-@Transactional
-@RestController
-@RequestMapping("/jasper")
-public class JasperCtl {
-
-    @PersistenceContext
-    private EntityManager entityManager;
-
-    @GetMapping(value = "/report", produces = MediaType.APPLICATION_PDF_VALUE)
-    public void generateReport(HttpServletResponse response)
-            throws JRException, IOException, SQLException {
-
-        System.out.println("******** Jasper Report Start ********");
-
-        Connection connection = null;
-
-        try {
-
-            // ============================
-            // 1. Load JRXML
-            // ============================
-
-            InputStream inputStream =
-                    getClass().getResourceAsStream("/reports/Project10.jrxml");
-
-            if (inputStream == null) {
-                throw new RuntimeException(
-                        "Project10.jrxml not found. " +
-                        "Put it inside src/main/resources/reports/"
-                );
-            }
-
-            System.out.println("JRXML loaded successfully");
-
-
-            // ============================
-            // 2. Compile JRXML
-            // ============================
-
-            JasperReport jasperReport =
-                    JasperCompileManager.compileReport(inputStream);
-
-            System.out.println("JRXML compiled successfully");
-
-
-            // ============================
-            // 3. Parameters
-            // ============================
-
-            Map<String, Object> parameters = new HashMap<>();
-
-            parameters.put("createdBy", "Admin");
-
-
-            // ============================
-            // 4. Get Database Connection
-            // ============================
-
-            SessionFactory sessionFactory =
-                    entityManager
-                            .getEntityManagerFactory()
-                            .unwrap(SessionFactory.class);
-
-            ConnectionProvider connectionProvider =
-                    sessionFactory
-                            .getSessionFactoryOptions()
-                            .getServiceRegistry()
-                            .getService(ConnectionProvider.class);
-
-            connection = connectionProvider.getConnection();
-
-            System.out.println("Database connection obtained");
-
-
-            // ============================
-            // 5. Fill Report
-            // ============================
-
-            JasperPrint jasperPrint =
-                    JasperFillManager.fillReport(
-                            jasperReport,
-                            parameters,
-                            connection
-                    );
-
-            System.out.println("Report filled successfully");
-
-
-            // ============================
-            // 6. Export PDF
-            // ============================
-
-            byte[] pdf =
-                    JasperExportManager.exportReportToPdf(jasperPrint);
-
-
-            // ============================
-            // 7. Send PDF Response
-            // ============================
-
-            response.setContentType(MediaType.APPLICATION_PDF_VALUE);
-
-            response.setHeader(
-                    "Content-Disposition",
-                    "inline; filename=Project10-Merit-List.pdf"
-            );
-
-            response.setContentLength(pdf.length);
-
-            response.getOutputStream().write(pdf);
-
-            response.getOutputStream().flush();
-
-            System.out.println("******** Report Generated Successfully ********");
-
-        } catch (Exception e) {
-
-            // ============================
-            // Print Complete Error
-            // ============================
-
-            System.out.println("******** Jasper Report Error ********");
-
-            e.printStackTrace();
-
-            Throwable cause = e;
-
-            while (cause != null) {
-                System.out.println("CAUSE: " + cause);
-                cause = cause.getCause();
-            }
-
-
-            // ============================
-            // Send Error Response
-            // ============================
-
-            response.reset();
-
-            response.setStatus(
-                    HttpServletResponse.SC_INTERNAL_SERVER_ERROR
-            );
-
-            response.setContentType("text/plain");
-
-            response.getWriter().write(
-                    "Jasper Report Error:\n\n" +
-                    e.toString()
-            );
-
-        } finally {
-
-            // ============================
-            // Close Database Connection
-            // ============================
-
-            if (connection != null) {
-                try {
-                    connection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-
-            System.out.println("******** Jasper Report End ********");
-        }
-    }
-}
-
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with Jaspersoft Studio version 6.21.5.final using JasperReports Library version 6.21.5-74d586df47b25dbd05bd0957999819196e59934a  -->
+<jasperReport xmlns="http://jasperreports.sourceforge.net/jasperreports" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://jasperreports.sourceforge.net/jasperreports http://jasperreports.sourceforge.net/xsd/jasperreport.xsd" name="Project10" pageWidth="595" pageHeight="842" columnWidth="555" leftMargin="20" rightMargin="20" topMargin="20" bottomMargin="20" uuid="cc758911-5c6e-429b-808c-6539068eda04">
+	<property name="com.jaspersoft.studio.data.sql.tables" value=""/>
+	<property name="com.jaspersoft.studio.data.defaultdataadapter" value="Project-10"/>
+	<queryString language="SQL">
+		<![CDATA[SELECT id, roll_no, student_id, name, physics, chemistry, maths, (physics + chemistry + maths) AS total FROM st_marksheet WHERE physics >= 33 AND chemistry >= 33 AND maths >= 33 ORDER BY total DESC;]]>
+	</queryString>
+	<field name="id" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="id"/>
+		<property name="com.jaspersoft.studio.field.label" value="id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="st_marksheet"/>
+	</field>
+	<field name="roll_no" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="roll_no"/>
+		<property name="com.jaspersoft.studio.field.label" value="roll_no"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="st_marksheet"/>
+	</field>
+	<field name="student_id" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="student_id"/>
+		<property name="com.jaspersoft.studio.field.label" value="student_id"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="st_marksheet"/>
+	</field>
+	<field name="name" class="java.lang.String">
+		<property name="com.jaspersoft.studio.field.name" value="name"/>
+		<property name="com.jaspersoft.studio.field.label" value="name"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="st_marksheet"/>
+	</field>
+	<field name="physics" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="physics"/>
+		<property name="com.jaspersoft.studio.field.label" value="physics"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="st_marksheet"/>
+	</field>
+	<field name="chemistry" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="chemistry"/>
+		<property name="com.jaspersoft.studio.field.label" value="chemistry"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="st_marksheet"/>
+	</field>
+	<field name="maths" class="java.lang.Integer">
+		<property name="com.jaspersoft.studio.field.name" value="maths"/>
+		<property name="com.jaspersoft.studio.field.label" value="maths"/>
+		<property name="com.jaspersoft.studio.field.tree.path" value="st_marksheet"/>
+	</field>
+	<field name="total" class="java.lang.Long">
+		<property name="com.jaspersoft.studio.field.name" value="total"/>
+		<property name="com.jaspersoft.studio.field.label" value="total"/>
+	</field>
+	<group name="id">
+		<groupExpression><![CDATA[$F{id}]]></groupExpression>
+	</group>
+	<group name="roll_no">
+		<groupExpression><![CDATA[$F{roll_no}]]></groupExpression>
+	</group>
+	<group name="student_id">
+		<groupExpression><![CDATA[$F{student_id}]]></groupExpression>
+	</group>
+	<group name="name">
+		<groupExpression><![CDATA[$F{name}]]></groupExpression>
+	</group>
+	<group name="physics">
+		<groupExpression><![CDATA[$F{physics}]]></groupExpression>
+	</group>
+	<group name="chemistry">
+		<groupExpression><![CDATA[$F{chemistry}]]></groupExpression>
+	</group>
+	<group name="maths">
+		<groupExpression><![CDATA[$F{maths}]]></groupExpression>
+	</group>
+	<group name="total">
+		<groupExpression><![CDATA[$F{total}]]></groupExpression>
+	</group>
+	<background>
+		<band splitType="Stretch"/>
+	</background>
+	<title>
+		<band height="79" splitType="Stretch">
+			<textField>
+				<reportElement x="248" y="40" width="100" height="30" uuid="4a259b6b-01b2-45a6-9f30-e4a81b70aec6"/>
+				<textFieldExpression><![CDATA["Merit List"]]></textFieldExpression>
+			</textField>
+		</band>
+	</title>
+	<pageHeader>
+		<band height="35" splitType="Stretch"/>
+	</pageHeader>
+	<columnHeader>
+		<band height="31" splitType="Stretch">
+			<staticText>
+				<reportElement x="0" y="0" width="72" height="30" uuid="12ecf993-5f95-45e9-8b38-d631360e0f46">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ff092adf-0d2d-4f2d-bdf5-9a8d0003914f"/>
+				</reportElement>
+				<text><![CDATA[id]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="72" y="0" width="69" height="30" uuid="c3e595da-1be9-4705-97e1-872b912660e1">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ab1b6a10-6562-41f7-b7a8-a8cd3eddbe2f"/>
+				</reportElement>
+				<text><![CDATA[roll_no]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="141" y="0" width="69" height="30" uuid="f5810e64-12d0-4e6a-9f06-e05364832e9c">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="69c4cf9b-fc7d-42b0-b9ff-f51e1add62e0"/>
+				</reportElement>
+				<text><![CDATA[student_id]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="210" y="0" width="69" height="30" uuid="f4649b6b-4739-4029-a6bb-7bbb23308650">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="08873e53-dbbe-4cb3-a129-f62a400cbadc"/>
+				</reportElement>
+				<text><![CDATA[name]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="279" y="0" width="69" height="30" uuid="87869da6-c1fa-4b10-88ea-72914937f339">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ee0d2b52-e679-4c81-b512-07ba57308776"/>
+				</reportElement>
+				<text><![CDATA[physics]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="348" y="0" width="69" height="30" uuid="0e190585-699a-451f-b43a-085286deddd6">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c18a3807-b6a7-4ab0-932a-ad69ac6cfc68"/>
+				</reportElement>
+				<text><![CDATA[chemistry]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="417" y="0" width="69" height="30" uuid="1d7747d5-6c16-40e3-99ee-12604cd670b4">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="77105860-67e3-4658-8eec-d3d14eca1f8d"/>
+				</reportElement>
+				<text><![CDATA[maths]]></text>
+			</staticText>
+			<staticText>
+				<reportElement x="486" y="0" width="69" height="30" uuid="3b7b1839-566d-4873-b63b-b1f868329a9f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="41331f72-868e-4689-b110-f75592967a27"/>
+				</reportElement>
+				<text><![CDATA[total]]></text>
+			</staticText>
+		</band>
+	</columnHeader>
+	<detail>
+		<band height="31" splitType="Stretch">
+			<textField>
+				<reportElement x="0" y="0" width="72" height="30" uuid="229f31f8-16b3-4c5c-ba21-5b51f0b6e3a8">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ff092adf-0d2d-4f2d-bdf5-9a8d0003914f"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{id}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="72" y="0" width="69" height="30" uuid="315d1cb5-d968-4821-9d7f-7bee1f31e756">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ab1b6a10-6562-41f7-b7a8-a8cd3eddbe2f"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{roll_no}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="141" y="0" width="69" height="30" uuid="0c40b12e-5ade-4033-827a-30430c376c53">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="69c4cf9b-fc7d-42b0-b9ff-f51e1add62e0"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{student_id}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="210" y="0" width="69" height="30" uuid="6262e51b-d29c-43e6-ba6f-22574b0f6726">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="08873e53-dbbe-4cb3-a129-f62a400cbadc"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{name}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="279" y="0" width="69" height="30" uuid="70035d19-9f47-4f36-974e-6c6f2857b8fd">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="ee0d2b52-e679-4c81-b512-07ba57308776"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{physics}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="348" y="0" width="69" height="30" uuid="a08ec5fa-a7ad-4755-a0a9-653edfcbc777">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="c18a3807-b6a7-4ab0-932a-ad69ac6cfc68"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{chemistry}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="417" y="0" width="69" height="30" uuid="2bf30bbc-2870-4d4e-a5e5-bac74fa5eec7">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="77105860-67e3-4658-8eec-d3d14eca1f8d"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{maths}]]></textFieldExpression>
+			</textField>
+			<textField>
+				<reportElement x="486" y="0" width="69" height="30" uuid="057b8607-0c69-4e07-8d30-7c096279c55f">
+					<property name="com.jaspersoft.studio.spreadsheet.connectionID" value="41331f72-868e-4689-b110-f75592967a27"/>
+				</reportElement>
+				<textFieldExpression><![CDATA[$F{total}]]></textFieldExpression>
+			</textField>
+		</band>
+	</detail>
+	<columnFooter>
+		<band height="45" splitType="Stretch"/>
+	</columnFooter>
+	<pageFooter>
+		<band height="54" splitType="Stretch"/>
+	</pageFooter>
+	<summary>
+		<band height="42" splitType="Stretch"/>
+	</summary>
+</jasperReport>
