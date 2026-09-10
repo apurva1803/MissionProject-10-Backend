@@ -1,7 +1,6 @@
 package com.rays.ctl;
 
 import java.io.OutputStream;
-import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,16 +20,15 @@ import com.rays.common.ORSResponse;
 import com.rays.dto.AttachmentDTO;
 import com.rays.dto.RoleDTO;
 import com.rays.dto.UserDTO;
-import com.rays.email.EmailDTO;
 import com.rays.email.EmailServiceImpl;
 import com.rays.form.ChangePasswordForm;
-import com.rays.form.ForgetPasswordForm;
 import com.rays.form.MyProfileForm;
 import com.rays.form.UserForm;
 import com.rays.service.AttachmentServiceInt;
 import com.rays.service.RoleServiceInt;
 import com.rays.service.UserServiceInt;
 
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 
@@ -106,27 +104,17 @@ public class UserCtl extends BaseCtl<UserForm, UserDTO, UserServiceInt> {
 	
 	
 	
-	
-	
-
-	
-	@PostMapping(value = "/profilePic/{userId}", consumes = "multipart/form-data")
-	public ORSResponse uploadPic(@PathVariable Long userId,
-			@RequestParam("file") MultipartFile file) {
-
-		if (file == null || file.isEmpty()) {
-			throw new RuntimeException("File is empty!");
-		}
-
-		System.out.println("File Name: " + file.getOriginalFilename());
-		System.out.println("File Size: " + file.getSize());
+	@PostMapping("/profilePic/{userId}")
+	public ORSResponse uploadPic(@PathVariable Long userId, @RequestParam("file") MultipartFile file,
+			HttpServletRequest req) {
 
 		AttachmentDTO attachmentDto = new AttachmentDTO(file);
-
+		
 		attachmentDto.setDescription("profile pic");
+
 		attachmentDto.setUserId(userId);
 
-		UserDTO userDto = baseService.findById(userId, null);
+		UserDTO userDto = baseService.findById(userId, userContext);
 
 		if (userDto.getImageId() != null && userDto.getImageId() > 0) {
 			attachmentDto.setId(userDto.getImageId());
@@ -146,39 +134,32 @@ public class UserCtl extends BaseCtl<UserForm, UserDTO, UserServiceInt> {
 	}
 
 	/**
-	 * Downloads the profile picture of a user.
-	 *
-	 * @param userId   ID of the user
-	 * @param response HTTP response used to send image data
+	 * Downloads profile picture.
+	 * 
+	 * @param userId user ID
+	 * @param response HTTP response
 	 */
 	@GetMapping("/profilePic/{userId}")
-	public void downloadPic(@PathVariable Long userId,
-			HttpServletResponse response) {
+	public void downloadPic(@PathVariable Long userId, HttpServletResponse response) {
 
 		try {
 
 			UserDTO userDto = baseService.findById(userId, null);
 
-			if (userDto == null || userDto.getImageId() == null) {
-				response.getWriter().write("No image found");
-				return;
+			AttachmentDTO attachmentDTO = null;
+
+			if (userDto != null) {
+				attachmentDTO = attachmentService.findById(userDto.getImageId(), null);
 			}
 
-			AttachmentDTO attachmentDTO =
-					attachmentService.findById(userDto.getImageId(), userContext);
-
-			if (attachmentDTO != null && attachmentDTO.getDoc() != null) {
-
+			if (attachmentDTO != null) {
 				response.setContentType(attachmentDTO.getType());
-
 				OutputStream out = response.getOutputStream();
 				out.write(attachmentDTO.getDoc());
 				out.close();
-
 			} else {
-				response.getWriter().write("File not found");
+				response.getWriter().write("ERROR: File not found");
 			}
-
 		} catch (Exception e) {
 			e.printStackTrace();
 		}

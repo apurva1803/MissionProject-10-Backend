@@ -200,7 +200,5 @@ public class UserDTO extends BaseDTO {
 		return null;
 	}
 
-	public String getEmail() {
-		return null;
-	}
+	
 }
