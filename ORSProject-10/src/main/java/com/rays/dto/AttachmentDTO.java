@@ -28,7 +28,7 @@ public class AttachmentDTO extends BaseDTO {
 	protected Long userId = null;
 
 	@Lob
-	@Column(name = "DOC")
+	@Column(name = "DOC",columnDefinition = "LONGBLOB")
 	private byte[] doc;
 
 	public AttachmentDTO() {
