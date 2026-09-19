@@ -1,11 +1,8 @@
 package com.rays.ctl;
 
-import java.util.Enumeration;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -16,15 +13,12 @@ import com.rays.common.ORSResponse;
 import com.rays.common.UserContext;
 import com.rays.config.JWTUtil;
 import com.rays.dto.UserDTO;
-import com.rays.email.EmailDTO;
-import com.rays.email.EmailServiceImpl;
 import com.rays.form.ForgetPasswordForm;
 import com.rays.form.LoginForm;
 import com.rays.form.UserForm;
 import com.rays.form.UserRegistrationForm;
 import com.rays.service.UserServiceInt;
 
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 
