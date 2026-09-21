@@ -31,7 +31,7 @@ public class JWTUtil {
 		long nowMillis = System.currentTimeMillis();
 		long expMillis = nowMillis + jwtExpiration;
 
-		// JWT Header
+		// JWT Header (meta information)
 		Map<String, Object> header = new HashMap<>();
 		header.put("alg", "HS256");
 		header.put("typ", "JWT");
