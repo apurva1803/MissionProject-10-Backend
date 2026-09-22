@@ -18,6 +18,7 @@ public class ApplicationExceptionHandlerCtl {
 	public ResponseEntity<ORSResponse> handleDatabaseException(Exception e) {
 
 		ORSResponse res = new ORSResponse(false);
+		
 		res.addMessage("Database server down!! Please try again later.");
 
 		return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(res);
@@ -27,6 +28,7 @@ public class ApplicationExceptionHandlerCtl {
 	public ResponseEntity<ORSResponse> handleRuntimeException(RuntimeException e) {
 
 		ORSResponse res = new ORSResponse(false);
+		
 		res.addMessage(e.getMessage());
 
 		return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(res);
