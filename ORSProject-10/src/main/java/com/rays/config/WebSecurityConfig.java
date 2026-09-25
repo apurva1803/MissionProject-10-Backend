@@ -16,34 +16,25 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 @EnableMethodSecurity(prePostEnabled = true)
 public class WebSecurityConfig {
 
-    @Autowired
-    private JWTRequestFilter jwtRequestFilter;
+	@Autowired
+	private JWTRequestFilter jwtRequestFilter;
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	@Bean
+	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
-        http
-            .csrf(csrf -> csrf.disable())
+		http.csrf(csrf -> csrf.disable())
 
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers(
-                    "/Auth/**",
-                    "/User/profilePic/**"
-                ).permitAll()
-                .anyRequest().authenticated()
-            )
+				.authorizeHttpRequests(
+						auth -> auth.requestMatchers("/Auth/**", "/User/profilePic/**", "/User/search/**").permitAll()
+								.anyRequest().authenticated())
 
-            .sessionManagement(session -> session
-                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-            )
+				.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-            .cors(cors -> {});
+				.cors(cors -> {
+				});
 
-        http.addFilterBefore(
-            jwtRequestFilter,
-            UsernamePasswordAuthenticationFilter.class
-        );
+		http.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
 
-        return http.build();
-    }
+		return http.build();
+	}
 }
