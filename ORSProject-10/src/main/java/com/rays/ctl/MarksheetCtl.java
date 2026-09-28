@@ -31,10 +31,10 @@ public class MarksheetCtl extends BaseCtl<MarksheetForm, MarksheetDTO, Marksheet
 	public ORSResponse preload() {
 		ORSResponse res = new ORSResponse(true);
 
-		List<StudentDTO> list = studentService.search(new StudentDTO(), userContext);
+		List<StudentDTO> list = studentService.search(new StudentDTO(), getUserContext());
 		res.addResult("studentList", list);
 
-		List<DropdownList> mlist = marksheetService.search(new MarksheetDTO(), userContext);
+		List<DropdownList> mlist = marksheetService.search(new MarksheetDTO(), getUserContext());
 		res.addResult("marksheetList", mlist);
 
 		return res;
@@ -45,7 +45,7 @@ public class MarksheetCtl extends BaseCtl<MarksheetForm, MarksheetDTO, Marksheet
 
 		ORSResponse res = new ORSResponse(true);
 
-		MarksheetDTO dto = baseService.findByRollNo(rollNo, userContext);
+		MarksheetDTO dto = baseService.findByRollNo(rollNo, getUserContext());
 
 		if (dto != null) {
 			res.addData(dto);
@@ -62,7 +62,7 @@ public class MarksheetCtl extends BaseCtl<MarksheetForm, MarksheetDTO, Marksheet
 
 		System.out.println("getMeritList run on ctl");
 
-		List<MarksheetDTO> list = baseService.getMeritList(userContext);
+		List<MarksheetDTO> list = baseService.getMeritList(getUserContext());
 
 		ORSResponse res = new ORSResponse(true);
 		res.addResult("list", list);

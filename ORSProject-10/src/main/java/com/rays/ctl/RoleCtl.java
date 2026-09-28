@@ -22,7 +22,7 @@ public class RoleCtl extends BaseCtl<RoleForm, RoleDTO, RoleServiceInt> {
 		ORSResponse res = new ORSResponse(true);
 		RoleDTO dto = new RoleDTO();
 		//dto.setStatus(RoleDTO.ACTIVE);
-		List<DropdownList> list = baseService.search(dto, userContext);
+		List<DropdownList> list = baseService.search(dto, getUserContext());
 		res.addResult("roleList", list);
 		return res;
 	}

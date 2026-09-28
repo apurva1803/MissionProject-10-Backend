@@ -50,7 +50,7 @@ public class UserCtl extends BaseCtl<UserForm, UserDTO, UserServiceInt> {
 		ORSResponse res = new ORSResponse(true);
 		RoleDTO dto = new RoleDTO();
 		// dto.setStatus(RoleDTO.ACTIVE);
-		List<DropdownList> list = roleService.search(dto, userContext);
+		List<DropdownList> list = roleService.search(dto, getUserContext());
 		res.addResult("roleList", list);
 		return res;
 	}
@@ -64,14 +64,14 @@ public class UserCtl extends BaseCtl<UserForm, UserDTO, UserServiceInt> {
 			return res;
 		}
 
-		UserDTO dto = baseService.findById(userContext.getUserId(), userContext);
+		UserDTO dto = baseService.findById(getUserContext().getUserId(), getUserContext());
 		dto.setFirstName(form.getFirstName());
 		dto.setLastName(form.getLastName());
 		dto.setDob(form.getDob());
 		dto.setPhone(form.getPhone());
 		dto.setGender(form.getGender());
 
-		baseService.update(dto, userContext);
+		baseService.update(dto, getUserContext());
 		
 		res.setSuccess(true);
 		res.addMessage("Your Profile updated successfully..!!");
@@ -89,7 +89,7 @@ public class UserCtl extends BaseCtl<UserForm, UserDTO, UserServiceInt> {
 		}
 
 		UserDTO changedDto = baseService.changePassword(form.getLoginId(), form.getOldPassword(), form.getNewPassword(),
-				userContext);
+				getUserContext());
 
 		if (changedDto == null) {
 			res.setSuccess(false);
@@ -115,17 +115,17 @@ public class UserCtl extends BaseCtl<UserForm, UserDTO, UserServiceInt> {
 
 		attachmentDto.setUserId(userId);
 
-		UserDTO userDto = baseService.findById(userId, userContext);
+		UserDTO userDto = baseService.findById(userId, getUserContext());
 
 		if (userDto.getImageId() != null && userDto.getImageId() > 0) {
 			attachmentDto.setId(userDto.getImageId());
 		}
 
-		Long imageId = attachmentService.save(attachmentDto, userContext);
+		Long imageId = attachmentService.save(attachmentDto, getUserContext());
 
 		if (userDto.getImageId() == null) {
 			userDto.setImageId(imageId);
-			baseService.update(userDto, userContext);
+			baseService.update(userDto, getUserContext());
 		}
 
 		ORSResponse res = new ORSResponse();

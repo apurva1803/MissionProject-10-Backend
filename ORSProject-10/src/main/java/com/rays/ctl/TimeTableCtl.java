@@ -30,8 +30,8 @@ public class TimeTableCtl extends BaseCtl<TimeTableForm, TimeTableDTO, TimeTable
 	@GetMapping("preload")
 	public ORSResponse preload() {
 	ORSResponse res = new ORSResponse(true);
-	List<CourseDTO> list = courseService.search(new CourseDTO(), userContext);
-	List<SubjectDTO> list1= subjectService.search(new SubjectDTO(), userContext);
+	List<CourseDTO> list = courseService.search(new CourseDTO(), getUserContext());
+	List<SubjectDTO> list1= subjectService.search(new SubjectDTO(), getUserContext());
 	res.addResult("courseList", list);
 	res.addResult("subjectList", list1);
 	return res;

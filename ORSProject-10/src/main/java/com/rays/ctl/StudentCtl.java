@@ -25,7 +25,7 @@ public class StudentCtl extends BaseCtl<StudentForm, StudentDTO, StudentServiceI
 	@GetMapping("preload")
 	public ORSResponse preload() {
 		ORSResponse res = new ORSResponse(true);
-		List<CollegeDTO> list = collegeService.search(new CollegeDTO(), userContext);
+		List<CollegeDTO> list = collegeService.search(new CollegeDTO(), getUserContext());
 		res.addResult("collegeList", list);
 		return res;
 	}

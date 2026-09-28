@@ -32,6 +32,10 @@ public class BaseCtl<F extends BaseForm, T extends BaseDTO, S extends BaseServic
 
 	protected UserContext userContext = null;
 
+	protected UserContext getUserContext() {
+		return UserContextHolder.getContext();
+	}
+
 	public ORSResponse validate(BindingResult bindingResult) {
 
 		ORSResponse res = new ORSResponse(true);
@@ -64,25 +68,25 @@ public class BaseCtl<F extends BaseForm, T extends BaseDTO, S extends BaseServic
 			T dto = (T) form.getDto();
 
 			if (dto.getId() != null && dto.getId() > 0) {
-				T existDto1 = (T) baseService.findByUniqueKey(dto.getUniqueKey(), dto.getUniqueValue(), userContext);
+				T existDto1 = (T) baseService.findByUniqueKey(dto.getUniqueKey(), dto.getUniqueValue(), getUserContext());
 				if (existDto1 != null && dto.getId() != existDto1.getId()) {
 					res.setSuccess(false);
 					res.addMessage(dto.getLabel() + " already exist");
 					return res;
 				}
-				baseService.update(dto, userContext);
+				baseService.update(dto, getUserContext());
 				res.addData(dto.getId());
 				res.addMessage(dto.getTableName() + " updated successfully..!!");
 			} else {
 				if (dto.getUniqueKey() != null && !dto.getUniqueKey().equals("")) {
-					T existDto = (T) baseService.findByUniqueKey(dto.getUniqueKey(), dto.getUniqueValue(), userContext);
+					T existDto = (T) baseService.findByUniqueKey(dto.getUniqueKey(), dto.getUniqueValue(), getUserContext());
 					if (existDto != null) {
 						res.setSuccess(false);
 						res.addMessage(dto.getLabel() + " already exist");
 						return res;
 					}
 				}
-				baseService.add(dto, userContext);
+				baseService.add(dto, getUserContext());
 				res.addData(dto.getId());
 				res.addMessage(dto.getTableName() + " added successfully..!!");
 			}
@@ -97,7 +101,7 @@ public class BaseCtl<F extends BaseForm, T extends BaseDTO, S extends BaseServic
 	@GetMapping("get/{id}")
 	public ORSResponse get(@PathVariable long id) {
 		ORSResponse res = new ORSResponse(true);
-		T dto = baseService.findById(id, userContext);
+		T dto = baseService.findById(id, getUserContext());
 		if (dto != null) {
 			res.addData(dto);
 		} else {
@@ -114,14 +118,14 @@ public class BaseCtl<F extends BaseForm, T extends BaseDTO, S extends BaseServic
 		ORSResponse res = new ORSResponse(true);
 		try {
 			for (String id : ids) {
-				baseService.delete(Long.parseLong(id), userContext);
+				baseService.delete(Long.parseLong(id), getUserContext());
 			}
 			
 			T dto = (T) form.getDto();
 
-			List<T> list = baseService.search(dto, Integer.parseInt(pageNo), pageSize, userContext);
+			List<T> list = baseService.search(dto, Integer.parseInt(pageNo), pageSize, getUserContext());
 
-			List<T> nextList = baseService.search(dto, Integer.parseInt(pageNo + 1), pageSize, userContext);
+			List<T> nextList = baseService.search(dto, Integer.parseInt(pageNo + 1), pageSize, getUserContext());
 
 			if (list.size() == 0) {
 				res.setSuccess(false);
@@ -148,9 +152,9 @@ public class BaseCtl<F extends BaseForm, T extends BaseDTO, S extends BaseServic
 
 		ORSResponse res = new ORSResponse(true);
 
-		List<T> list = baseService.search(dto, pageNo, pageSize, userContext);
+		List<T> list = baseService.search(dto, pageNo, pageSize, getUserContext());
 
-		List<T> nextList = baseService.search(dto, pageNo + 1, pageSize, userContext);
+		List<T> nextList = baseService.search(dto, pageNo + 1, pageSize, getUserContext());
 
 		if (list.size() == 0) {
 			res.setSuccess(false);

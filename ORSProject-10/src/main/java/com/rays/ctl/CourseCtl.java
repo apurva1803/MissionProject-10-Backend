@@ -28,7 +28,7 @@ public class CourseCtl extends BaseCtl<CourseForm, CourseDTO, CourseServiceInt> 
 		ORSResponse res = new ORSResponse(true);
 		CourseDTO dto = new CourseDTO();
 		// dto.setStatus(RoleDTO.ACTIVE);
-		List<DropdownList> list = courseService.search(dto, userContext);
+		List<DropdownList> list = courseService.search(dto, getUserContext());
 		res.addResult("courseList", list);
 		return res;
 	}

@@ -26,7 +26,7 @@ public class CollegeCtl extends BaseCtl<CollegeForm, CollegeDTO, CollegeServiceI
 		ORSResponse res = new ORSResponse(true);
 		CollegeDTO dto = new CollegeDTO();
 		// dto.setStatus(RoleDTO.ACTIVE);
-		List<DropdownList> list = collegeService.search(dto, userContext);
+		List<DropdownList> list = collegeService.search(dto, getUserContext());
 		res.addResult("collegeList", list);
 		return res;
 	}

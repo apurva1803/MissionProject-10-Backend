@@ -36,9 +36,9 @@ public class FacultyCtl extends BaseCtl<FacultyForm, FacultyDTO, FacultyServiceI
 	@GetMapping("/preload")
 	public ORSResponse preload() {
 		ORSResponse res = new ORSResponse(true);
-		List<DropdownList> courseList = courseService.search(new CourseDTO(), userContext);
-		List<DropdownList> subjectList = subjectService.search(new SubjectDTO(), userContext);
-		List<DropdownList> collegeList = collegeService.search(new CollegeDTO(), userContext);
+		List<DropdownList> courseList = courseService.search(new CourseDTO(), getUserContext());
+		List<DropdownList> subjectList = subjectService.search(new SubjectDTO(), getUserContext());
+		List<DropdownList> collegeList = collegeService.search(new CollegeDTO(), getUserContext());
 		res.addResult("courseList", courseList);
 		res.addResult("subjectList", subjectList);
 		res.addResult("collegeList", collegeList);

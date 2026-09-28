@@ -2,10 +2,8 @@ package com.rays.form;
 
 import com.rays.common.BaseDTO;
 import com.rays.common.BaseForm;
-import com.rays.dto.HotelDTO;
 import com.rays.dto.OnlineVotingDTO;
 
-import jakarta.persistence.Column;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 
@@ -20,8 +18,8 @@ public class OnlineVotingForm extends BaseForm {
 	@NotEmpty(message = "Constituency is required")
 	private String constituency;
 	
-	@NotEmpty(message = "HasVoted is required")
-	private boolean hasVoted;
+	@NotNull(message = "HasVoted is required")
+	private Boolean hasVoted;
 
 	public String getName() {
 		return name;
@@ -47,11 +45,11 @@ public class OnlineVotingForm extends BaseForm {
 		this.constituency = constituency;
 	}
 
-	public boolean isHasVoted() {
+	public Boolean getHasVoted() {
 		return hasVoted;
 	}
 
-	public void setHasVoted(boolean hasVoted) {
+	public void setHasVoted(Boolean hasVoted) {
 		this.hasVoted = hasVoted;
 	}
 	
@@ -62,7 +60,9 @@ public class OnlineVotingForm extends BaseForm {
 		dto.setName(name);
 		dto.setAge(age);
 		dto.setConstituency(constituency);
-		dto.setHasVoted(hasVoted);
+		if (hasVoted != null) {
+			dto.setHasVoted(hasVoted);
+		}
 
 		return dto;
 		

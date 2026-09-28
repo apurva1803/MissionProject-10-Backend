@@ -56,7 +56,7 @@ public class OnlineVotingDTO extends BaseDTO{
 
 	@Override
 	public String getUniqueKey() {
-		return "Constituency";
+		return "constituency";
 	}
 
 	@Override

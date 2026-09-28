@@ -32,53 +32,52 @@ public class JWTRequestFilter extends OncePerRequestFilter {
 	@Override
 	protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
 			throws ServletException, IOException {
+		UserContextHolder.clear();
+		try {
 
-		final String authorizationHeader = request.getHeader("Authorization");
+			final String authorizationHeader = request.getHeader("Authorization");
+			
+			System.out.println("JWT Token ======>>>>> " + authorizationHeader);
 
-		System.out.println("JWT Token ======>>>>> " + authorizationHeader);
+			if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+				String jwtToken = authorizationHeader.substring(7);
 
-		if (authorizationHeader != null && authorizationHeader.startsWith("Bearer ")) {
+				try {
 
-			System.out.println("JWT Token ======>>>>> iiiiinnnnnn");
+					String loginId = jwtUtil.extractLoginId(jwtToken);
 
-			String jwtToken = authorizationHeader.substring(7);
+					if (!jwtUtil.validateToken(jwtToken, loginId)) {
+						throw new Exception("Invalid JWT token");
+					}
 
-			try {
+					if (loginId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
 
-				String loginId = jwtUtil.extractLoginId(jwtToken);
+						UserDetails userDetails = jwtUserDetailsService.loadUserByUsername(loginId);
 
-				if (!jwtUtil.validateToken(jwtToken, loginId)) {
-					throw new Exception("Invalid JWT token");
+						UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+								userDetails, null, userDetails.getAuthorities());
+
+						authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+						SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+					}
+
+					UserDTO dto = new UserDTO();
+					dto.setId(jwtUtil.extractUserId(jwtToken));
+					dto.setLoginId(loginId);
+					dto.setRoleName(jwtUtil.extractRole(jwtToken));
+
+					UserContextHolder.setContext(new UserContext(dto));
+
+				} catch (Exception e) {
+					response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+					response.getWriter().write("Token is invalid... plz login again..!!");
+					return;
 				}
-
-				if (loginId != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-
-					UserDetails userDetails = jwtUserDetailsService.loadUserByUsername(loginId);
-
-					UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
-							userDetails, null, userDetails.getAuthorities());
-
-					authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-
-					SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-				}
-
-				UserDTO dto = new UserDTO();
-				dto.setLoginId(loginId);
-
-				System.out.println("request filter: " + dto.getLoginId());
-
-				UserContext context = new UserContext(dto);
-
-				// ThreadLocal me set
-				UserContextHolder.setContext(context);
-
-			} catch (Exception e) {
-				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-				response.getWriter().write("Token is invalid... plz login again..!!");
-				return;
 			}
+			filterChain.doFilter(request, response);
+		} finally {
+			UserContextHolder.clear();
 		}
-		filterChain.doFilter(request, response);
 	}
 }
