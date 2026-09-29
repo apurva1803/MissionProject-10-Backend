@@ -11,27 +11,24 @@ import com.rays.common.BaseCtl;
 import com.rays.common.DropdownList;
 import com.rays.common.ORSResponse;
 import com.rays.dto.FoodDeliveryDTO;
-import com.rays.dto.HotelDTO;
-import com.rays.form.HotelForm;
+import com.rays.form.FoodDeliveryForm;
 import com.rays.service.FoodDeliveryServiceInt;
-import com.rays.service.HotelServiceInt;
 
 @RestController
-@RequestMapping(value = "Hotel")
-public class HotelCtl extends BaseCtl<HotelForm, HotelDTO, HotelServiceInt>{
-
+@RequestMapping(value = "FoodDelivery")
+public class FoodDeliveryCtl extends BaseCtl<FoodDeliveryForm, FoodDeliveryDTO, FoodDeliveryServiceInt> {
+	
 	@Autowired
-	HotelServiceInt hotelService = null;
+	FoodDeliveryServiceInt foodService = null;
 	
 	@GetMapping("preload")
 	public ORSResponse preload() {
 		ORSResponse res = new ORSResponse(true);
 		
-		HotelDTO dto = new HotelDTO();
+		FoodDeliveryDTO dto = new FoodDeliveryDTO();
 		
-		List<DropdownList> Hotellist = hotelService.search(dto, getUserContext());
-		res.addResult("List", Hotellist);
+		List<DropdownList> restaurantList = foodService.search(dto, getUserContext());
+		res.addResult("restaurantList", restaurantList);
 		return res;
 	}
-
 }
